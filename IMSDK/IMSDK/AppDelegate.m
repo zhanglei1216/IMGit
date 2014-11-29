@@ -11,7 +11,7 @@
 #import <CommonCrypto/CommonDigest.h>
 #import "GroupViewController.h"
 
-//#define Host @"127.0.0.1"
+#define Host @"127.0.0.1"
 //#define Host @"www.applutai.com"
 //#define Port 5222
 //#define Host @"192.168.0.102"
