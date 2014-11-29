@@ -14,9 +14,9 @@
 //#define Host @"127.0.0.1"
 //#define Host @"www.applutai.com"
 //#define Port 5222
-#define Host @"192.168.0.102"
+//#define Host @"192.168.0.102"
 //#define Host @"192.168.100.125"
-#define Port 10000
+//#define Port 10000
 //#define Port 49575
 
 @interface AppDelegate ()
