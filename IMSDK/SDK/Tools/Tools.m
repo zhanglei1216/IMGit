@@ -111,52 +111,17 @@
     return result;
 }
 
-+ (NSString *)encode:(NSString *)password{
-    const char *cStr = [password UTF8String];
-    unsigned char passBytes[CC_MD5_DIGEST_LENGTH];
-    md(cStr, passBytes);
-     uint8_t passHash[CC_SHA256_DIGEST_LENGTH];
-    sha256([[self hex:passBytes] UTF8String], passHash);
-    return [self hex:passHash];
-}
 
-void md(const char * cStr, Byte * byte){
-    CC_MD5( cStr, (unsigned int)strlen(cStr), byte);
-    if (strlen((const char *)byte) > 16) {
-        byte[16] = '\0';
-    }else if(strlen((const char *)byte) < 16){
-        for (int i = (int)strlen((const char *)byte); i < 16; i++) {
-            byte[i] = 0x0;
-        }
-        byte[16] = '\0';
-    }
-}
-
-void sha256(const char * cStr, Byte * bytes){
-    CC_SHA256(cStr, (unsigned int)strlen(cStr), bytes);
-    if (strlen((const char *)bytes) > 32) {
-        bytes[32] = '\0';
-    }else if(strlen((const char *)bytes) < 32){
-        for (int i = (int)strlen((const char *)bytes); i < 32; i++) {
-            bytes[i] = 0x0;
-        }
-        bytes[32] = '\0';
-    }
-}
-
-+ (NSString *)hex:(Byte *)bytes{
++ (NSString *)hex:(NSData *)bytes{
     //下面是Byte 转换为16进制。
-    int count = 0;
-    if (strlen((const char *)bytes) > 16) {
-        count = 32;
-    }else{
-        count = 16;
-    }
     NSString *hexStr=@"";
-    for(int i=0;i < count;i++)
+    for(int i=0;i < bytes.length;i++)
         
     {
-        NSString *newHexStr = [NSString stringWithFormat:@"%x",bytes[i]&0xff];///16进制数
+        char byte;
+        [bytes getBytes:&byte range:NSMakeRange(i, 1)];
+        
+        NSString *newHexStr = [NSString stringWithFormat:@"%x",byte&0xff];///16进制数
         
         if([newHexStr length]==1)
             
@@ -164,11 +129,20 @@ void sha256(const char * cStr, Byte * bytes){
         
         else
             
-            hexStr = [NSString stringWithFormat:@"%@%@",hexStr,newHexStr]; 
-    } 
-    return hexStr; 
+            hexStr = [NSString stringWithFormat:@"%@%@",hexStr,newHexStr];
+    }
+    return hexStr;
 }
-
++ (NSString *)encode:(NSString *)password{
+    const char *cStr = [password UTF8String];
+    unsigned char passBytes[CC_MD5_DIGEST_LENGTH];
+    CC_MD5( cStr, (unsigned int)strlen(cStr), passBytes);
+    NSData *passBytesData = [NSData dataWithBytes:passBytes length:CC_MD5_DIGEST_LENGTH];
+    unsigned char passHash[CC_SHA256_DIGEST_LENGTH];
+    CC_SHA256([[self hex:passBytesData] UTF8String], (unsigned int)strlen([[self hex:passBytesData] UTF8String]), passHash);
+    NSData *passHashData = [NSData dataWithBytes:passHash length:CC_SHA256_DIGEST_LENGTH];
+    return [self hex:passHashData];
+}
 //sha1加密方式
 + (NSString *)getSha1String:(NSString *)srcString{
     const char *cstr = [srcString cStringUsingEncoding:NSUTF8StringEncoding];
@@ -237,15 +211,15 @@ void sha256(const char * cStr, Byte * bytes){
     return result;
 }
 
-#pragma mark - 
+#pragma mark -
 #pragma mark - Encryption
 
 + (NSData *)encryptionWithMessage:(NSData *)message key:(Byte)key methon:(int)methon{
     long count = message.length;
-     char *src = (char *)message.bytes;
+    char *src = (char *)message.bytes;
     NSMutableData *result = [[NSMutableData alloc] init];
     for (long i = 0; i < count; i++) {
-         Byte r = encyp(src[i], key, methon);
+        Byte r = encyp(src[i], key, methon);
         [result appendBytes:&r length:sizeof(r)];
     }
     return result;
